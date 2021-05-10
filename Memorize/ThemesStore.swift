@@ -7,9 +7,20 @@
 
 import Foundation
 import SwiftUI
+import Combine
 
 class ThemesStore: ObservableObject {
-    @Published var themes = createDefaultThemes()
+    @Published var themes = loadThemes() ?? createDefaultThemes()
+    private var autosave: AnyCancellable?
+    
+    init() {
+        autosave = $themes.sink { themes in
+            themes.forEach { theme in print("Theme .\(theme.id.uuidString) is saved")
+                UserDefaults.standard.setValue(themes.map { $0.id.uuidString } , forKey: "EmojiMemoriGame.ThemesId")
+                UserDefaults.standard.setValue(theme.json, forKey: "EmojiMemoryGame.Themes.\(theme.id.uuidString)")
+            }
+        }
+    }
     
     func addNewTheme() -> Void {
         themes.append(Theme(name: "Untitled",
@@ -33,11 +44,37 @@ class ThemesStore: ObservableObject {
         }
     }
     
+    func changeColor(of theme: Theme, by color: Color) {
+        if let index = themes.firstIndex(of: theme) {
+            themes[index].color = color
+        }
+    }
+    
+    func changeNumberOfPairs(of theme: Theme, by numberOfPairs: Int) {
+        if let index = themes.firstIndex(of: theme) {
+            themes[index].numberOfPairs = numberOfPairs
+        }
+    }
     
     func renameTheme(_ theme: Theme, with name: String) {
         if let index = themes.firstIndex(of: theme) {
             themes[index].name = name
         }
+    }
+    
+    
+    static private func loadThemes() -> [Theme]? {
+        print("Try to load themes")
+        let themesId: [String]? = UserDefaults.standard.stringArray(forKey: "EmojiMemoriGame.ThemesId")
+        var themes = [Theme]()
+        themesId?.forEach { uuidString in
+            let themeData = UserDefaults.standard.data(forKey: "EmojiMemoryGame.Themes.\(uuidString)")
+            if let theme = Theme(json: themeData) { themes.append(theme)
+                print("Theme .\(uuidString) loaded")
+            }
+        }
+        //var themes = [Theme]()
+        return themes.isEmpty ? nil : themes
     }
     
     static func createDefaultThemes() -> [Theme] {
@@ -54,6 +91,7 @@ class ThemesStore: ObservableObject {
                             emojis: ["💍", "👠", "🪖", "👑", "🧳"],
                             numberOfPairs: 5,
                             color: Color.red))
+        print("Create default themes")
         return themes
     }
 

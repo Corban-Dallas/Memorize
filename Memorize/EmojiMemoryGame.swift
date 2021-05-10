@@ -46,6 +46,11 @@ class EmojiMemoryGame: ObservableObject {
         model = EmojiMemoryGame.createMemoryGame(with: theme)
     }
     
+    func StartNewGame(with theme: Theme) {
+        self.theme = theme
+        startNewGame()
+    }
+    
 
 }
 

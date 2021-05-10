@@ -11,10 +11,14 @@ struct ThemeEditor: View {
     @EnvironmentObject var themesStore: ThemesStore
     @State private var themeName: String = ""
     @State private var emojisToAdd: String = ""
+    @State private var selectedColor: Color = Color.black
     private var theme: Theme
+    
+    var colors = ["red", "green", "blue"]
     
     init(edit theme: Theme) {
         self.theme = theme
+        self.selectedColor = theme.color
     }
     
     var body: some View {
@@ -28,6 +32,9 @@ struct ThemeEditor: View {
                             themesStore.renameTheme(theme, with: themeName)
                         }
                     })
+
+                    ColorPicker("Theme color", selection: $selectedColor)
+
                     TextField(
                         "Choose new emojis",
                         text: $emojisToAdd,
@@ -49,6 +56,9 @@ struct ThemeEditor: View {
             }
             .onAppear {
                 themeName = theme.name
+            }
+            .onDisappear {
+                themesStore.changeColor(of: theme, by: selectedColor)
             }
         }
     }
