@@ -11,14 +11,14 @@ struct ThemeEditor: View {
     @EnvironmentObject var themesStore: ThemesStore
     @State private var themeName: String = ""
     @State private var emojisToAdd: String = ""
-    @State private var selectedColor: Color = Color.black
+    @State private var selectedColor: Color = Color.clear
+    @State private var selectedNumberOfPairs: Int = 0
     private var theme: Theme
     
-    var colors = ["red", "green", "blue"]
-    
+    @State private var showRemovingEmojisAlert = false
+        
     init(edit theme: Theme) {
         self.theme = theme
-        self.selectedColor = theme.color
     }
     
     var body: some View {
@@ -35,6 +35,12 @@ struct ThemeEditor: View {
 
                     ColorPicker("Theme color", selection: $selectedColor)
 
+                    Stepper(value: $selectedNumberOfPairs, in: 2...theme.emojis.count,
+                            onEditingChanged: { began in
+                                if !began {
+                                    themesStore.changeNumberOfPairs(of: theme, by: selectedNumberOfPairs)
+                                }
+                            }, label: { Text("Number of pairs: \(selectedNumberOfPairs)") } )
                     TextField(
                         "Choose new emojis",
                         text: $emojisToAdd,
@@ -49,13 +55,26 @@ struct ThemeEditor: View {
                     Grid(theme.emojis, id: \.self) { emoji in
                             Text(emoji)
                                 .onTapGesture {
+                                    if theme.emojis.count == 2 {
+                                        showRemovingEmojisAlert = true
+                                        return
+                                    }
                                     themesStore.removeEmoji(emoji, from: theme)
+                                    selectedNumberOfPairs = min(selectedNumberOfPairs, theme.emojis.count - 1)
+                                }
+                                .alert(isPresented: $showRemovingEmojisAlert) {
+                                    return Alert(title: Text("Remove error"),
+                                                 message: Text("Theme can not contain less than 2 emojis."),
+                                                 dismissButton: .default(Text("OK")))
                                 }
                     }
+                    
                 }
             }
             .onAppear {
                 themeName = theme.name
+                selectedColor = theme.color
+                selectedNumberOfPairs = theme.numberOfPairs
             }
             .onDisappear {
                 themesStore.changeColor(of: theme, by: selectedColor)

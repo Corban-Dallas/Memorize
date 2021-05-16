@@ -41,6 +41,7 @@ class ThemesStore: ObservableObject {
     func removeEmoji(_ emoji: String, from theme: Theme) {
         if let index = themes.firstIndex(of: theme) {
             themes[index].emojis.removeAll(where: { $0 == emoji })
+            themes[index].numberOfPairs = min(themes[index].emojis.count, themes[index].numberOfPairs)
         }
     }
     
@@ -52,7 +53,7 @@ class ThemesStore: ObservableObject {
     
     func changeNumberOfPairs(of theme: Theme, by numberOfPairs: Int) {
         if let index = themes.firstIndex(of: theme) {
-            themes[index].numberOfPairs = numberOfPairs
+            themes[index].numberOfPairs = min(numberOfPairs, themes[index].emojis.count)
         }
     }
     

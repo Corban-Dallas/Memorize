@@ -16,14 +16,6 @@ struct ThemeChooser: View {
 
     var body: some View {
         NavigationView {
-//            List {
-//                ForEach(themesStore.themes) { theme in
-//                    NavigationLink(destination: EmojiMemoryGameView(viewModel: EmojiMemoryGame(with: theme))) {
-//                        ThemeListItem(theme: theme)
-//                    }
-//                }
-//                .onDelete(perform: { themesStore.themes.remove(atOffsets: $0) })
-//            }
             List() {
                 ForEach(themesStore.themes) { theme in
                     NavigationLink(destination: EmojiMemoryGameView(viewModel: EmojiMemoryGame(with: theme))) {

@@ -21,7 +21,7 @@ struct Theme: Codable, Hashable, Identifiable {
     init (name: String, emojis: Array<String>, numberOfPairs: Int, color: Color, id: UUID? = nil) {
         self.name = name
         self.color = color
-        self.numberOfPairs = numberOfPairs
+        self.numberOfPairs = min(numberOfPairs, emojis.count)
         self.emojis = Array<String>(emojis[0..<self.numberOfPairs])
         self.id = id ?? UUID()
     }
@@ -30,7 +30,7 @@ struct Theme: Codable, Hashable, Identifiable {
         if json != nil, let newTheme = try? JSONDecoder().decode(Theme.self, from: json!) {
             self.name = newTheme.name
             self.emojis = newTheme.emojis
-            self.numberOfPairs = newTheme.numberOfPairs
+            self.numberOfPairs = min(newTheme.numberOfPairs, newTheme.emojis.count)
             self.color = newTheme.color
             self.id = newTheme.id
         } else { return nil }
